@@ -2,7 +2,7 @@ import requests
 import xml.etree.ElementTree as ET
 import tkinter
 #
-#병원정보 서비스 예제
+#노래방 서비스 예제
 url = 'https://openapi.gg.go.kr/sngrumIndutype?'
 # 공공데이터포털에서 발급받은 디코딩되지 않은 인증키 입력
 service_key = ""
@@ -42,5 +42,3 @@ for item in root.iter("row"):
 
 window.mainloop()
 
-
-# 목표 - 지도(cef 모듈)
