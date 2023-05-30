@@ -30,7 +30,7 @@ window = Tk()
 window.title("노래방,식당")
 DataList = []
 
-# 검색기능
+# 지역리스트 삽입
 def InitSearchBox():
     global SearchBox
     ListBoxScrollbar = Scrollbar(window)
