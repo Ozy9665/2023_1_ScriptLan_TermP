@@ -1,6 +1,9 @@
 import requests
 import xml.etree.ElementTree as ET
-import tkinter
+from tkinter import *
+import tkinter.ttk
+
+
 #
 #노래방 서비스 예제
 karaoke_url = 'https://openapi.gg.go.kr/sngrumIndutype?'
@@ -22,15 +25,20 @@ restaurant_root = ET.fromstring(restaurant_response.text)
 window = tkinter.Tk()
 window.title("노래방,식당")
 
-frame = tkinter.Frame(window)
-frame.pack()
+# 페이지 나누기
+notebook = tkinter.ttk.Notebook(window, width=800, height=600)
+notebook.pack()
+
+frame1 = Frame(window)
+notebook.add(frame1, text='노래방')
+Label(frame1, text='페이지1내용', fg='red', font='helvetica 48')
 
 header = ["Name", "Addr", "TELNO"]
 res_header = ["ResName", "ResAddr", "ResTel"]
 
 # 노래방
 for i, col_name in enumerate(header):
-    label = tkinter.Label(frame, text=col_name, font=("Helvetica", 14, "bold"))
+    label = Label(frame1, text=col_name, font=("Helvetica", 14, "bold"))
     label.grid(row=0, column=i)
 
 
@@ -42,15 +50,18 @@ for item in karaoke_root.iter("row"):
 
     data = [BIZPLC_NM, REFINE_ROADNM_ADDR, LOCPLC_FACLT_TELNO]
     for i, value in enumerate(data):
-        label = tkinter.Label(frame, text=value, font=("Helvetica", 12))
+        label = tkinter.Label(frame1, text=value, font=("Helvetica", 12))
         label.grid(row=row_count, column=i)
 
     row_count += 1
 
 
+frame2=Frame(window)
+notebook.add(frame2, text='식당')
+Label(frame2, text='페이지2내용', fg='blue', font='helvetica 48')
 # 레스토랑
 for i, col_name in enumerate(res_header):
-    label = tkinter.Label(frame, text=col_name, font=("Helvetica", 14, "bold"))
+    label = tkinter.Label(frame2, text=col_name, font=("Helvetica", 14, "bold"))
     label.grid(row=row_count, column=i)
 
 row_count += 1
@@ -62,7 +73,7 @@ for item in restaurant_root.iter("row"):
 
     data = [BIZPLC_NM, REFINE_ROADNM_ADDR, LOCPLC_FACLT_TELNO]
     for i, value in enumerate(data):
-        label = tkinter.Label(frame, text=value, font=("Helvetica", 12))
+        label = Label(frame2, text=value, font=("Helvetica", 12))
         label.grid(row=row_count, column=i)
 
     row_count += 1
