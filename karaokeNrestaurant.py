@@ -7,7 +7,7 @@ import Sggucd
 
 
 
-
+query = 'portal/data/service/selectServicePage.do?page=1&rows=10&sortColumn=&sortDirection=&infId=DTG5WLA687OMHJMFRXH627862292&infSeq=3&order=&loc=&searchWord=%EB%85%B8%EB%9E%98%EB%B0%A9'
 
 #노래방 서비스 예제
 karaoke_url = 'https://openapi.gg.go.kr/sngrumIndutype?'
@@ -30,15 +30,16 @@ window = Tk()
 window.title("노래방,식당")
 DataList = []
 
+
 # 지역리스트 삽입
 def InitSearchBox():
-    global SearchBox
-    ListBoxScrollbar = Scrollbar(window)
+    global SearchListBox
+    ListBoxScrollbar = Scrollbar(frame1)
     ListBoxScrollbar.pack()
     ListBoxScrollbar.place(x=150, y=50)
 
     TempFont = font.Font(window, size=15, weight='bold', family='Consolas')
-    SearchListBox = Listbox(window, font=TempFont, activestyle='none',
+    SearchListBox = Listbox(frame1, font=TempFont, activestyle='none',
                             width=10, height=5, borderwidth=12, relief='ridge',
                             yscrollcommand=ListBoxScrollbar.set)
 
@@ -50,6 +51,78 @@ def InitSearchBox():
 
     ListBoxScrollbar.config(command=SearchListBox.yview)
 
+
+def InitSearchButton():
+    TempFont = font.Font(window, size=12, weight='bold', family='Consolas')
+    SearchButton = Button(window, font=TempFont, text='검색', command=SearchButtonAction)
+    SearchButton.pack()
+    SearchButton.place(x=330, y=110)
+
+
+def SearchButtonAction():
+    global SearchListBox
+
+    RenderText.configure(state='normal')
+    RenderText.delete(0.0, END)
+    iSearchIndex = SearchListBox.curselection()[0]
+
+    sgguCd = Sggucd.SGGUCD[iSearchIndex][0]
+    Search(sgguCd)
+
+    RenderText.configure(state='disabled')
+
+
+def Search(sgguCd):
+    import http.client
+    url = 'openapi.gg.go.kr'
+    # port = 80
+    conn = http.client.HTTPConnection(url)
+    # conn = http.client.HTTPConnection(url, port)
+    conn.request('GET', query+sgguCd)
+    # conn.request('GET', '/sngrumIndutype?'+sgguCd)
+
+    req = conn.getresponse()
+
+    global DataList
+    DataList.clear()
+
+    if req.status == 200:
+        strXml = req.read().decode('utf-8')
+    tree = ET.fromstring(strXml)
+    itemElements = tree.iter('row')
+    for row in itemElements:
+        addr = row.find('REFINE_ROADNM_ADDR')
+        name = row.find('BIZPLC_NM')
+        telno = row.find('LOCPLC_FACLT_TELNO')
+        DataList.append((name.text, addr.text, telno.text))
+    for i in range(len(DataList)):
+        RenderText.insert(INSERT, '[')
+        RenderText.insert(INSERT, i+1)
+        RenderText.insert(INSERT, '] ')
+        RenderText.insert(INSERT, ' 병원명: ')
+        RenderText.insert(INSERT, DataList[i][0])
+        RenderText.insert(INSERT, '\n')
+        RenderText.insert(INSERT, '주소: ')
+        RenderText.insert(INSERT, DataList[i][1])
+        RenderText.insert(INSERT, '\n')
+        RenderText.insert(INSERT, '전화번호')
+        RenderText.insert(INSERT, DataList[i][2])
+        RenderText.insert(INSERT, '\n\n')
+
+
+def InitRenderText():
+    global RenderText
+    RenderTextScrollbar = Scrollbar(frame1)
+    RenderTextScrollbar.pack()
+    RenderTextScrollbar.place(x=375, y=200)
+    TempFont = font.Font(frame1, size=10, family='Consolas')
+    RenderText = Text(frame1, width=49, height=27, borderwidth=12, relief='ridge', yscrollcommand=RenderTextScrollbar.set)
+    RenderText.pack()
+    RenderText.place(x=10, y=215)
+    RenderTextScrollbar.config(command=RenderText.yview)
+    RenderTextScrollbar.pack(side=RIGHT, fill=BOTH)
+
+    RenderText.configure(state='disabled')
 
 # 페이지 나누기
 notebook = tkinter.ttk.Notebook(window, width=800, height=600)
@@ -107,5 +180,7 @@ for item in restaurant_root.iter("row"):
     row_count += 1
 '''
 InitSearchBox()
+InitSearchButton()
+InitRenderText()
 window.mainloop()
 
