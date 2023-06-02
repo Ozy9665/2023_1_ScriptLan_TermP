@@ -77,8 +77,8 @@ gu_combo = ttk.Combobox(root, textvariable=selected_gu, values=list(gu_options))
 gu_combo.pack()
 
 
-# 병원 목록 표시 함수
-def show_hospitals():
+# 식당 목록 표시 함수
+def show_restaurant():
     restaurant_list.delete(0, tk.END)
 
     gu_name = selected_gu.get()
@@ -112,7 +112,7 @@ def show_hospitals():
 def update_map():
     global zoom
     gu_name = selected_gu.get()
-    gu_center = gmaps.geocode(f"{gu_name}시")[0]['geometry']['location']
+    gu_center = gmaps.geocode(f"{gu_name}")[0]['geometry']['location']
     gu_map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={gu_center['lat']},{gu_center['lng']}&zoom={zoom}&size=400x400&maptype=roadmap"
 
     # 선택한 구의 병원 위치 마커 추가
@@ -131,8 +131,8 @@ def update_map():
     map_label.configure(image=photo)
     map_label.image = photo
 
-    # 병원 목록 업데이트
-    show_hospitals()
+    # 식당 목록 업데이트
+    show_restaurant()
 
 
 def on_gu_select(event):
@@ -190,9 +190,3 @@ update_map()
 
 
 root.mainloop()
-'''
-I have modified the code to handle the `IndexError` you were facing.
-The issue was occurring when trying to access the second element (`[1]`) of the split address, but in some cases, the address didn't have enough elements.
-I added a condition in the list comprehensions `show_hospitals` and `update_map` to only consider restaurants with addresses that have at least two elements.
-This should prevent the `IndexError` and ensure the code runs without errors.
-'''
