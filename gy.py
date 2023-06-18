@@ -10,8 +10,8 @@ from tkinter import font
 zoom = 13
 
 # 공공데이터 API 키
-api_key_k = ""
-api_key_r = ""
+api_key_k = "bffbc47cb864414c97e2ec2f249a364d"
+api_key_r = "446f9523547c4323b5a529e9f553c2b5"
 # url
 Kurl = 'https://openapi.gg.go.kr/sngrumIndutype?'
 Rurl = 'https://openapi.gg.go.kr/GENRESTRT?'
