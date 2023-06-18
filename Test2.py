@@ -21,6 +21,15 @@ Rurl = 'https://openapi.gg.go.kr/GENRESTRT?'
 
 # 공공데이터 API 요청 파라미터
 r_params = {
+    "KEY": api_key_r,
+    "pSize": 350,
+    "sgguCd": 41390,
+}
+
+karaoke_rooms = []
+
+# 노래방 공공데이터 API 요청 파라미터
+k_params = {
     "KEY": api_key_k,
     "pSize": 350,
     "sgguCd": 41390,
@@ -40,6 +49,8 @@ for item in items:
         "emplies": item.findtext("TOT_EMPLY_CNT"),
     }
     restaurants.append(restaurant)
+
+
 
 # Google Maps API 클라이언트 생성
 gmaps = Client(key=Google_API_Key)
@@ -76,6 +87,30 @@ def show_restaurant():
         restaurant_list.insert(tk.END, f"{restaurant['name']} ({restaurant['emplies']} emplies)")
 
 
+# 노래방
+response = requests.get(Kurl, params=k_params)
+root = ET.fromstring(response.content)
+items = root.findall(".//row")
+
+for item in items:
+    karaoke_room = {
+        "name": item.findtext("BIZPLC_NM"),
+        "address": item.findtext("REFINE_ROADNM_ADDR"),
+        "lat": item.findtext("REFINE_WGS84_LAT"),
+        "lng": item.findtext("REFINE_WGS84_LOGT"),
+        "rooms": item.findtext("ROOM_CNT"),
+    }
+    karaoke_rooms.append(karaoke_room)
+
+def show_karaoke():
+    karaoke_list.delete(0, tk.END)
+
+    gu_name = selected_gu.get()
+    karaoke_in_gu = [karaoke for karaoke in karaoke_rooms if len(karaoke['address'].split()) >= 2 and karaoke['address'].split()[1] == gu_name]
+
+    for karaoke in karaoke_in_gu:
+        karaoke_list.insert(tk.END, f"{karaoke['name']} ({karaoke['rooms']} rooms)")
+
 def update_map():
     global zoom
     gu_name = selected_gu.get()
@@ -90,6 +125,12 @@ def update_map():
             marker_url = f"&markers=color:red%7C{lat},{lng}"
             gu_map_url += marker_url
 
+    for karaoke in karaoke_rooms:
+        if karaoke['lat'] and karaoke['lng']:
+            lat, lng = float(karaoke['lat']), float(karaoke['lng'])
+            marker_url = f"&markers=color:blue%7C{lat},{lng}"
+            gu_map_url += marker_url
+
     response = requests.get(gu_map_url+'&key='+Google_API_Key)
     image = Image.open(io.BytesIO(response.content))
     photo = ImageTk.PhotoImage(image)
@@ -97,6 +138,7 @@ def update_map():
     map_label.image = photo
 
     show_restaurant()
+    show_karaoke()
 
 
 def on_gu_select(event):
@@ -121,6 +163,10 @@ canvas.pack()
 # 식당 목록 리스트박스 생성
 restaurant_list = tk.Listbox(root, width=60)
 restaurant_list.pack(side=tk.LEFT, fill=tk.BOTH)
+
+# 노래방 목록 리스트박스 생성
+karaoke_list = tk.Listbox(root, width=60)
+karaoke_list.pack(side=tk.LEFT, fill=tk.BOTH)
 
 # 스크롤바 생성
 scrollbar = tk.Scrollbar(root)
@@ -150,6 +196,7 @@ zoom_out_button.pack(side=tk.LEFT)
 # 콤보박스 이벤트 바인딩
 gu_combo.bind("<<ComboboxSelected>>", on_gu_select)
 
+show_karaoke()
 update_map()
 
 root.mainloop()
